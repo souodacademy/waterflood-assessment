@@ -1,0 +1,12 @@
+import { Link } from '@tanstack/react-router'
+import { ArrowDownToLine, ArrowUpFromLine, TriangleAlert } from 'lucide-react'
+import { number, wellAlerts, type Well, type WorkspaceData } from '@/lib/waterflood'
+
+export function Connectivity({ wells,data }: {wells:Well[];data:WorkspaceData}) {
+  const injectors=wells.filter(w=>w.well_type==='Injector')
+  const renderNode=(w:Well)=><Link to="/wells/$wellId" params={{wellId:w.id}} className={`connection-node ${w.well_type==='Injector'?'injector':''} ${wellAlerts(w,data.thresholds,data.measurements).length?'attention':''}`}><strong>{w.well_type==='Injector'?<ArrowDownToLine size={13}/>:<ArrowUpFromLine size={13}/>} {w.name}{wellAlerts(w,data.thresholds,data.measurements).length>0&&<TriangleAlert size={12} className="text-destructive"/>}</strong><span>{number(w.well_type==='Injector'?w.injection_rate:w.oil_rate)} bbl/d · {w.well_type}</span><span>{w.well_type==='Injector'?`${number(w.pressure)} psi`:`${number(w.water_cut)}% water cut`} · {w.status}</span></Link>
+  return <section className="panel"><div className="panel-heading"><div><h2 className="panel-title">Injector–producer connectivity</h2><p className="panel-subtitle">Injection patterns & associated production</p></div><div className="legend-items text-[10px] text-muted-foreground"><span><i className="legend-dot injection"/>Injector</span><span><i className="legend-dot oil"/>Producer</span></div></div><div className="network-header"><span>{injectors.length} injectors · {data.relationships.filter(r=>wells.some(w=>w.id===r.injector_id)).length} relationships</span><span>Distance in km · not to scale</span></div><div className="connectivity">{injectors.map(w=>{
+    const relationships=data.relationships.filter(r=>r.injector_id===w.id)
+    return <div key={w.id}><div className="text-[10px] text-muted-foreground mb-3">{w.field_name}</div><div className="connection-group">{renderNode(w)}<div className="connection-lines">{relationships.map(r=><span key={r.id}>{r.distance} km{r.status==='Inactive'?' (off)':''}</span>)}</div><div className="connection-producers">{relationships.map(r=>{const p=data.wells.find(x=>x.id===r.producer_id);return p?<div key={r.id}>{renderNode(p)}</div>:null})}{!relationships.length&&<p className="text-xs text-muted-foreground">No associated producers</p>}</div></div></div>
+  })}{!injectors.length&&<div className="empty-state">No injectors in this selection.</div>}</div></section>
+}
