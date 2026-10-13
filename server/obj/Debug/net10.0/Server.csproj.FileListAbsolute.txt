@@ -31,3 +31,4 @@
 /Users/rahiq/my-waterflood-assessment/waterflood-dotnet-react/server/obj/Debug/net10.0/Server.pdb
 /Users/rahiq/my-waterflood-assessment/waterflood-dotnet-react/server/obj/Debug/net10.0/Server.genruntimeconfig.cache
 /Users/rahiq/my-waterflood-assessment/waterflood-dotnet-react/server/obj/Debug/net10.0/ref/Server.dll
+/Users/rahiq/my-waterflood-assessment/waterflood-dotnet-react/server/obj/Debug/net10.0/Server.sourcelink.json

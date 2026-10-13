@@ -8,6 +8,7 @@ builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
     policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
 builder.Services.AddHttpClient<SupabaseWorkspaceService>();
 builder.Services.AddHttpClient<SupabaseMutationService>();
+builder.Services.AddHttpClient<ThresholdNotificationService>();
 
 var app = builder.Build();
 app.UseCors();
@@ -15,11 +16,13 @@ app.UseCors();
 app.MapGet("/api/health", () => Results.Ok(new { status = "ok" }));
 // Anonymous sample rows remain readable. If a bearer token is supplied, the
 // workspace service validates it and includes the resolved role in the result.
-app.MapGet("/api/workspace", async (HttpContext context, SupabaseWorkspaceService service, CancellationToken cancellationToken) =>
+app.MapGet("/api/workspace", async (HttpContext context, SupabaseWorkspaceService service, ThresholdNotificationService notifications, CancellationToken cancellationToken) =>
 {
     try
     {
-        return Results.Ok(await service.GetAsync(context.Request.Headers.Authorization.ToString(), cancellationToken));
+        var workspace = await service.GetAsync(context.Request.Headers.Authorization.ToString(), cancellationToken);
+        await notifications.NotifyAsync(workspace, cancellationToken);
+        return Results.Ok(workspace);
     }
     catch (Exception exception) when (exception is HttpRequestException or InvalidOperationException)
     {

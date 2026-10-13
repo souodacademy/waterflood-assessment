@@ -43,6 +43,21 @@ Passwords are generated at runtime and written only to the ignored local file
 `.demo-credentials.local.md`. The service-role key and generated passwords
 must never be committed.
 
+## Threshold email notifications
+
+The API sends one deduplicated email when current well data crosses a
+configured threshold. Configure Resend with environment variables before
+starting the server:
+
+```sh
+export Notifications__ResendApiKey="re_xxx"
+export Notifications__FromEmail="Waterflood alerts <alerts@your-domain.com>"
+export Notifications__RecipientEmail="you@example.com"
+```
+
+The notification is sent on the next workspace read and is retried if Resend
+rejects it. Remove the variables to disable email delivery.
+
 ## Role model
 
 Roles are read from the `user_roles` table:
